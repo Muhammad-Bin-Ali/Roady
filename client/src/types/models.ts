@@ -16,6 +16,20 @@ export interface GPSPoint {
   timestamp: string;
 }
 
+export interface Vehicle {
+  make: string;
+  model: string;
+  year: number;
+}
+
+export interface TripMetadata {
+  name?: string;
+  source?: string;
+  destination?: string;
+  vehicle?: Vehicle;
+  [key: string]: unknown;
+}
+
 export interface Trip {
   id: string;
   userId: string;
@@ -29,6 +43,9 @@ export interface Trip {
   route: GPSPoint[];
   status: 'active' | 'completed' | 'paused';
   thumbnail?: string;
+  source?: string;
+  destination?: string;
+  vehicle?: Vehicle;
 }
 
 export interface TripSummary {

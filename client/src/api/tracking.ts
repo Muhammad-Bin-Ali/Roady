@@ -1,4 +1,4 @@
-import type { GPSPoint, Trip } from '@/types/models';
+import type { GPSPoint, Trip, TripMetadata, Vehicle } from '@/types/models';
 import type { StartTripResponse, StopTripResponse, HeartbeatStatus } from '@/types/api';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -9,7 +9,13 @@ const tripPoints: Map<string, GPSPoint[]> = new Map();
 
 export async function startTrip(
   userId: string,
-  metadata?: Record<string, unknown>
+  metadata?: {
+    name?: string;
+    source?: string;
+    destination?: string;
+    vehicle?: Vehicle;
+    [key: string]: unknown;
+  }
 ): Promise<StartTripResponse> {
   await delay(300);
 
@@ -19,12 +25,15 @@ export async function startTrip(
   const trip: Trip = {
     id: tripId,
     userId,
-    name: metadata?.name as string || `Trip ${new Date().toLocaleDateString()}`,
+    name: metadata?.name || `Trip ${new Date().toLocaleDateString()}`,
     startTime,
     distance: 0,
     duration: 0,
     route: [],
     status: 'active',
+    source: metadata?.source,
+    destination: metadata?.destination,
+    vehicle: metadata?.vehicle,
   };
 
   activeTrips.set(tripId, trip);

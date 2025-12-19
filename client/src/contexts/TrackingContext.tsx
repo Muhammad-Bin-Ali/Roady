@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
-import type { GPSPoint } from '@/types/models';
+import type { GPSPoint, TripMetadata } from '@/types/models';
 import type { TrackingServiceState } from '@/types/tracking';
 import * as trackingService from '@/services/trackingService';
 import { useAuth } from './AuthContext';
@@ -7,7 +7,7 @@ import { useAuth } from './AuthContext';
 interface TrackingContextType {
   state: TrackingServiceState;
   lastLocation: GPSPoint | null;
-  startTracking: () => Promise<void>;
+  startTracking: (metadata?: TripMetadata) => Promise<void>;
   stopTracking: () => Promise<void>;
   getCurrentLocation: () => Promise<GPSPoint>;
 }
@@ -40,7 +40,7 @@ export function TrackingProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const startTracking = useCallback(async () => {
+  const startTracking = useCallback(async (metadata?: TripMetadata) => {
     if (!user) throw new Error('Must be authenticated to track');
     await trackingService.startTracking(user.id);
     setState(trackingService.getState());
