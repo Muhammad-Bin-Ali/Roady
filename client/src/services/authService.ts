@@ -43,7 +43,9 @@ export async function initializeAuth(): Promise<AuthState> {
       const response = await authApi.refreshSession(token);
 
       if (response.success) {
-        const user = JSON.parse(userData) as User;
+        // Use user from response if available, otherwise fallback to stored user
+        const user = response.user || (JSON.parse(userData) as User);
+        
         authState = {
           isAuthenticated: true,
           user,
@@ -51,7 +53,10 @@ export async function initializeAuth(): Promise<AuthState> {
           isLoading: false,
         };
 
-        // Update stored token if refreshed
+        // Update stored data
+        if (response.user) {
+           await Preferences.set({ key: USER_DATA_KEY, value: JSON.stringify(response.user) });
+        }
         if (response.token) {
           await Preferences.set({ key: AUTH_TOKEN_KEY, value: response.token });
         }

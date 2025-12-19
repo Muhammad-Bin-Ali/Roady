@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"roady-server/db"
 	"roady-server/models"
-	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -81,3 +80,36 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		Token:   token,
 	})
 }
+
+func ValidateSession(w http.ResponseWriter, r *http.Request) {
+	// Get token from Authorization header
+	token := r.Header.Get("Authorization")
+	if token == "" {
+		http.Error(w, "Missing authorization token", http.StatusUnauthorized)
+		return
+	}
+
+	// In this simple implementation, the token IS the user ID
+	userID := token
+
+	var user models.User
+	err := db.DB.QueryRow(
+		"SELECT id, email, username, created_at FROM users WHERE id = $1",
+		userID,
+	).Scan(&user.ID, &user.Email, &user.Username, &user.CreatedAt)
+
+	if err == sql.ErrNoRows {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
+	} else if err != nil {
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(models.AuthResponse{
+		Success: true,
+		User:    &user,
+		Token:   userID, // Return the same token/ID
+	})
+}
+

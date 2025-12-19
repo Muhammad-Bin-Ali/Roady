@@ -13,6 +13,7 @@ func main() {
 
 	http.HandleFunc("/auth/signup", enableCors(handlers.SignUp))
 	http.HandleFunc("/auth/login", enableCors(handlers.Login))
+	http.HandleFunc("/auth/me", enableCors(handlers.ValidateSession))
 
 	http.HandleFunc("/trips", enableCors(handlers.GetTrips))
 
